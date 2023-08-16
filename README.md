@@ -43,11 +43,44 @@ python -m pip install -e .
 We provide a [demo notebook](demo.ipynb) which shows how to perform feature extraction and matching on an image pair.
 
 
+
+# Contribution 
+- We used open cv to perform the image processing and use that image processing with the lightglue to check the processing time
+
+<b>To see the implementation run cv_2_lightglue.ipynb file</b>
+
+```python
+
+# Visualize LightGlue results with OpenCV tools
+def lightglue2opencv(points0, points1, matches, kpts0, kpts1, img0, img1, **kwargs):
+    return {
+        "src_pts": points0.numpy().reshape(-1, 1, 2),
+        "dst_pts": points1.numpy().reshape(-1, 1, 2),
+        "kp0": cv2.KeyPoint_convert(kpts0.numpy()),
+        "kp1": cv2.KeyPoint_convert(kpts1.numpy()),
+        "matches": tuple(
+            cv2.DMatch(matches[i][0].item(), matches[i][1].item(), 0.) 
+            for i in range(matches.shape[0])
+        ),
+        "img0": cv2.cvtColor((255 * img0).numpy().astype(np.uint8).transpose(1, 2, 0), cv2.COLOR_RGB2GRAY),
+        "img1": cv2.cvtColor((255 * img1).numpy().astype(np.uint8).transpose(1, 2, 0), cv2.COLOR_RGB2GRAY)
+    }
+
+
+%time results_lightglue_opencv = lightglue2opencv(**results_lightglue)
+homography_lightglue = visualize_opencv(**results_lightglue_opencv, cfg=cfg.lightglue["homography"], title="LightGlue")
+
+
+```
+
 ## Other links
 - [hloc - the visual localization toolbox](https://github.com/cvg/Hierarchical-Localization/): run LightGlue for Structure-from-Motion and visual localization.
 - [LightGlue-ONNX](https://github.com/fabio-sim/LightGlue-ONNX): export LightGlue to the Open Neural Network Exchange format.
 - [Image Matching WebUI](https://github.com/Vincentqyw/image-matching-webui): a web GUI to easily compare different matchers, including LightGlue.
 - [kornia](https://kornia.readthedocs.io) now exposes LightGlue via the interfaces [`LightGlue`](https://kornia.readthedocs.io/en/latest/feature.html#kornia.feature.LightGlue) and [`LightGlueMatcher`](https://kornia.readthedocs.io/en/latest/feature.html#kornia.feature.LightGlueMatcher).
+
+
+
 
 ## BibTeX Citation
 If you use any ideas from the paper or code from this repo, please consider citing:
@@ -62,6 +95,7 @@ If you use any ideas from the paper or code from this repo, please consider citi
   year      = {2023}
 }
 ```
+
 
 
 ## License
